@@ -54,7 +54,7 @@ public class GameManagerScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-       map = new int[] { 0,0,0,1,0,2,0,0,0};
+       map = new int[] { 0,0,2,1,0,2,0,0,0};
         PrintArray();
 
 
@@ -70,11 +70,15 @@ public class GameManagerScript : MonoBehaviour
         {
             int playerIndex = GetPlayerIndex();
 
-            MoveNumber(1,playerIndex,playerIndex + 1);
+            MoveNumber(1, playerIndex, playerIndex + 1);
             PrintArray();
 
         }
-
+        if(Input.GetKeyDown(KeyCode.LeftArrow)) { 
+            int playerIndex = GetPlayerIndex();
+            MoveNumber(1, playerIndex, playerIndex - 1);
+            PrintArray();
+        }
        
 
     }
