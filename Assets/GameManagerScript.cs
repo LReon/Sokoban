@@ -2,9 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
+
 public class GameManagerScript : MonoBehaviour
 {
     public GameObject playerPrefab;
+    public GameObject boxPrefab;
 
     int[,] map;
 
@@ -22,6 +25,7 @@ public class GameManagerScript : MonoBehaviour
     //}
 
 
+   
 
     private  Vector2Int GetPlayerIndex()
     {
@@ -42,33 +46,58 @@ public class GameManagerScript : MonoBehaviour
     }
 
 
-    bool MoveNumber(string Player,Vector2Int moveFrom,Vector2Int moveTo) { 
-        if(moveTo.x < 0 || moveTo.x >= field.Length) { return false; }
+    bool MoveNumber(Vector2Int moveFrom,Vector2Int moveTo) { 
+        if(moveTo.x < 0 || moveTo.x >= field.GetLength(0)) { return false; }
         {
 
             return false;
         }
-        if (moveTo.y < 0 || moveTo.y >= field.Length) { return false; }
+        if (moveTo.y < 0 || moveTo.y >= field.GetLength(2)) { return false; }
         {
 
             return false;
         }
 
-        //if (map[moveTo] == 2)
-        //{
-        //    int velocity = moveTo - moveFrom;
-
-        //    bool success = MoveNumber(2, moveTo, moveTo + velocity);
-        //    if(!success)
-        //    {
-        //        return false;
-        //    }
-
-        //}
+        if (field[moveTo.y,moveTo.x] != null && field[moveTo.y,moveTo.x].tag == "Box")
+        {
+            Vector2Int velocity = moveTo - moveFrom;
+            bool success = MoveNumber(moveTo, moveTo + velocity);
+            if(!success)
+            {
+                return false;
+            }
+        }
 
         field[moveTo.x,moveTo.y] = field[moveFrom.y,moveFrom.x];
         field[moveFrom.x,moveFrom.y] = null;
+        field[moveFrom.y, moveFrom.x].transform.position = new Vector3(moveTo.x, map.GetLength(0) - moveTo.y, 0);
         return true;
+    }
+
+    bool IsCleard()
+    {
+        List<Vector2Int> goals = new List<Vector2Int>();
+        for (int y = 0; y < map.GetLength(0); y++)
+        {
+            for (int x = 0; x < map.GetLength(1); x++)
+            {
+                if (map[y, x] == 3)
+                {
+                    goals.Add(new Vector2Int(x, y));
+                }
+            }
+        }
+    
+        for (int i = 0; i < goals.Count; i++)
+        {
+            GameObject f = field[goals[i].y, goals[i].x];
+            if(f == null || f.tag != "Box")
+            {
+                return false;
+            }
+            
+        }
+
     }
 
     // Start is called before the first frame update
@@ -78,9 +107,9 @@ public class GameManagerScript : MonoBehaviour
 
 
         map = new int[,]{
-        {0,0,0,0,1 },
-        {0,0,0,0,0 },
-        {0,0,0,0,0 }
+        {0,0,0,2,0 },
+        {1,0,2,0,0 },
+        {0,0,0,0,2 }
     };
         field = new GameObject[map.GetLength(0), map.GetLength(1)];
 
@@ -94,6 +123,11 @@ public class GameManagerScript : MonoBehaviour
                 {
                     field[y,x] = Instantiate(playerPrefab,new Vector3(x,map.GetLength(0) - y,0), Quaternion.identity);
                 }
+                if (map[y, x] == 2)
+                {
+                    field[y, x] = Instantiate(boxPrefab, new Vector3(x, map.GetLength(0) - y, 0), Quaternion.identity);
+                }
+
                 debugText += map[y, x].ToString() + ",";
             }
             debugText += "\n";
@@ -113,20 +147,10 @@ public class GameManagerScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //if (Input.GetKeyDown(KeyCode.RightArrow))
-        //{
-        //    int playerIndex = GetPlayerIndex();
-
-        //    MoveNumber(1, playerIndex, playerIndex + 1);
-        //    PrintArray();
-
-        //}
-        //if(Input.GetKeyDown(KeyCode.LeftArrow)) { 
-        //    int playerIndex = GetPlayerIndex();
-        //    MoveNumber(1, playerIndex, playerIndex - 1);
-        //    PrintArray();
-        //}
-       
-
+        if (Input.GetKeyDown(KeyCode.RightArrow))
+        {
+            Vector2Int playerIndex = GetPlayerIndex();
+            MoveNumber(playerIndex,playerIndex + new Vector2Int(1,0));
+        }
     }
 }
